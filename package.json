@@ -1,19 +1,22 @@
 {
-  "name": "ressly-api",
+  "name": "node-postgresql-restapi",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "node --watch src/index.js"
+    "dev": "node --env-file .env --watch src/index.js",
+    "lint": "eslint ."
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
   "dependencies": {
-    "express": "^5.1.0",
+    "express": "^4.21.2",
     "morgan": "^1.10.1",
     "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.1.1",
+    "eslint": "^9.1.0"
   }
 }

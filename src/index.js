@@ -1,10 +1,18 @@
-import express from 'express'
-import { PORT } from './config.js'
-import userRoutes from './routes/users.routes.js'
+import express from "express";
+import usersRoutes from "./routes/users.routes.js";
+import morgan from "morgan";
+import { PORT } from "./config.js";
 
-const app = express()
+const app = express();
 
-app.use(userRoutes);
+app.use(morgan("dev"));
 
-app.listen(PORT)
-console.log('Server on port', PORT)
+// middlewares
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+app.use(usersRoutes);
+
+app.listen(PORT);
+// eslint-disable-next-line no-console
+console.log("Server on port", PORT);
