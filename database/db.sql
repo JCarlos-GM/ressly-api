@@ -1,5 +1,3 @@
-DROP TABLE IF EXISTS usuarios;
-
 CREATE TABLE usuarios (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -8,7 +6,15 @@ CREATE TABLE usuarios (
     fecha_creacion TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+SELECT * from usuarios;
+
+DROP TABLE usuarios;
+
 INSERT INTO usuarios (nombre, correo, contrasena)
-VALUES 
-    ('Juan Pérez', 'juan.perez@example.com', 'password123'),
-    ('María García', 'maria.garcia@example.com', 'password456');
+    VALUES ('Juan Pérez', 'juan.perez@example.com', 'una_contrasena_segura');
+
+UPDATE usuarios
+SET nombre = 'Juan Carlos Govea Magaña', 
+    correo = 'jgoveamagana@gmail.com', 
+    contrasena = '380674'
+WHERE id = 1;
