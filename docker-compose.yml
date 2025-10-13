@@ -4,8 +4,8 @@ services:
     image: postgres
     restart: always
     environment:
-      POSTGRES_USER: fazt
-      POSTGRES_PASSWORD: faztpassword
-      POSTGRES_DB: nodepg
+      POSTGRES_USER: jcarlosgm
+      POSTGRES_PASSWORD: rm9PiAjDlGqWEuDJiUk7rcxf3OL586Eb
+      POSTGRES_DB: resslydb
     ports:
-      - 5432:5432
+      - 3000:5432
