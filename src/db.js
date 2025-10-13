@@ -1,11 +1,11 @@
 import pg from "pg";
-import {
-  DB_USER,
-  DB_HOST,
-  DB_PASSWORD,
-  DB_DATABASE,
-  DB_PORT,
-  DB_SSL
+import { 
+  DB_USER, 
+  DB_HOST, 
+  DB_PASSWORD, 
+  DB_DATABASE, 
+  DB_PORT, 
+  DB_SSL 
 } from "./config.js";
 
 // Validar que todas las variables de entorno requeridas estén presentes
