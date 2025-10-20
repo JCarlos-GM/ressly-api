@@ -1,5 +1,6 @@
 import express from "express";
 import usersRoutes from "./routes/users.routes.js";
+import registerRoutes from "./routes/register.routes.js";  // AGREGAR ESTA LÍNEA
 import morgan from "morgan";
 import { PORT } from "./config.js";
 import { pool } from "./db.js";
@@ -19,13 +20,15 @@ app.get("/", (req, res) => {
     version: "1.0.0",
     endpoints: {
       usuarios: "/api/usuarios",
-      usuario: "/api/usuarios/:id"
+      usuario: "/api/usuarios/:id",
+      registro: "/api/register"
     }
   });
 });
 
-// Rutas de usuarios con prefijo /api
+// Rutas
 app.use("/api", usersRoutes);
+app.use("/api", registerRoutes);  // AGREGAR ESTA LÍNEA
 
 // Manejo de rutas no encontradas
 app.use((req, res) => {
@@ -48,25 +51,19 @@ app.use((err, req, res, next) => {
 // Verificar conexión a BD e iniciar servidor
 const startServer = async () => {
   try {
-    // Test de conexión
     const client = await pool.connect();
     console.log("✅ Conexión exitosa a PostgreSQL");
     client.release();
     
-    // Iniciar servidor
     app.listen(PORT, () => {
       console.log(`\n🚀 Servidor corriendo en puerto ${PORT}`);
       console.log(`📍 http://localhost:${PORT}`);
       console.log(`📋 Endpoints disponibles:`);
-      console.log(`   GET    http://localhost:${PORT}/api/usuarios`);
-      console.log(`   GET    http://localhost:${PORT}/api/usuarios/:id`);
-      console.log(`   POST   http://localhost:${PORT}/api/usuarios`);
-      console.log(`   PUT    http://localhost:${PORT}/api/usuarios/:id`);
-      console.log(`   DELETE http://localhost:${PORT}/api/usuarios/:id\n`);
+      console.log(`   POST   http://localhost:${PORT}/api/register/validate-code`);
+      console.log(`   POST   http://localhost:${PORT}/api/register/resident\n`);
     });
   } catch (error) {
     console.error("❌ Error al conectar con PostgreSQL:", error.message);
-    console.error("Verifica tu archivo .env y la conexión a la base de datos");
     process.exit(1);
   }
 };
