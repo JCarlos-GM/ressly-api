@@ -1,6 +1,6 @@
 import express from "express";
 import usersRoutes from "./routes/users.routes.js";
-import registerRoutes from "./routes/register.routes.js";  // AGREGAR ESTA LÍNEA
+import registerRoutes from "./routes/register.routes.js";
 import morgan from "morgan";
 import { PORT } from "./config.js";
 import { pool } from "./db.js";
@@ -21,14 +21,15 @@ app.get("/", (req, res) => {
     endpoints: {
       usuarios: "/api/usuarios",
       usuario: "/api/usuarios/:id",
-      registro: "/api/register"
+      registro_validate_code: "/api/register/validate-code",
+      registro_resident: "/api/register/resident"
     }
   });
 });
 
 // Rutas
 app.use("/api", usersRoutes);
-app.use("/api", registerRoutes);  // AGREGAR ESTA LÍNEA
+app.use("/api/register", registerRoutes);  // <-- CORREGIDO
 
 // Manejo de rutas no encontradas
 app.use((req, res) => {
