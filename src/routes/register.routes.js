@@ -32,7 +32,7 @@ const upload = multer({
 });
 
 /**
- * Ruta para validar un código de invitación.
+ * Ruta para validar un código de invitación
  * URL: POST /api/register/validate-code
  * Acceso: Público
  * Body esperado: { "invitationCode": "string" }
