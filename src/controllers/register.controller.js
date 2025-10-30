@@ -78,29 +78,39 @@ export const validateInvitationCode = async (req, res) => {
 
 /**
  * Controlador para registrar a un nuevo residente.
- * Este proceso incluye varias validaciones, la subida de dos imágenes a Cloudinary,
- * la inserción del nuevo usuario en la base de datos y la invalidación
- * del código de invitación que se usó.
+ * (Versión actualizada: NO recibe password, SÍ recibe firstName y lastName)
  */
 export const registerResident = async (req, res) => {
   try {
-    const { fullName, email, phoneNumber, houseNumber, idResidential, idCode } = req.body;
+    // --- CAMBIO 1: Recibir campos del body ---
+    // NO hay 'password'. 
+    // SÍ hay 'firstName' y 'lastName' (en lugar de 'fullName').
+    const { 
+      firstName, 
+      lastName, 
+      email, 
+      phoneNumber, 
+      houseNumber, 
+      idResidential, 
+      idCode 
+    } = req.body;
 
-    // 1. Validar que todos los campos de texto y archivos necesarios están presentes.
-    if (!fullName || !email || !phoneNumber || !houseNumber || !idResidential || !idCode) {
+    // 2. Validar campos de texto y archivos
+    // Se quita la validación de 'password'
+    if (!firstName || !lastName || !email || !phoneNumber || !houseNumber || !idResidential || !idCode) {
       return res.status(400).json({ error: "Todos los campos son requeridos" });
     }
     if (!req.files || !req.files.ineImage || !req.files.residentPhoto) {
       return res.status(400).json({ error: "Las imágenes (INE y foto del residente) son requeridas" });
     }
 
-    // 2. Verificar que el código de invitación es válido y no ha sido usado.
+    // 3. Verificar que el código de invitación es válido (Sin cambios)
     const codeCheck = await pool.query("SELECT is_used FROM invitation_codes WHERE id_code = $1", [idCode]);
     if (codeCheck.rows.length === 0 || codeCheck.rows[0].is_used) {
       return res.status(400).json({ error: "Código de invitación no válido o ya utilizado" });
     }
 
-    // 3. Verificar que la casa existe en la residencial y obtener su ID.
+    // 4. Verificar que la casa existe y obtener su ID (Sin cambios)
     const houseCheck = await pool.query(
       "SELECT id_house FROM houses WHERE house_number = $1 AND id_residential = $2",
       [houseNumber, idResidential]
@@ -110,38 +120,44 @@ export const registerResident = async (req, res) => {
     }
     const idHouse = houseCheck.rows[0].id_house;
 
-    // 4. Subir imágenes a Cloudinary en paralelo.
+    // 5. Subir imágenes a Cloudinary (Sin cambios)
     const [ineUrl, residentPhotoUrl] = await Promise.all([
       uploadImage(req.files.ineImage[0].buffer),
       uploadImage(req.files.residentPhoto[0].buffer)
     ]);
 
-    // 5. Insertar el nuevo residente en la base de datos.
+    // 6. Insertar el nuevo residente en la base de datos
+    // --- CAMBIO 2: Actualizar la consulta INSERT ---
+    // (Sin 'password', y usando 'first_name', 'last_name', 'resident_ine_photo_url')
     const residentResponse = await pool.query(
-      `INSERT INTO residents (full_name, email, phone_number, resident_photo_url, resident_ine_url, id_house, id_residential)
+      `INSERT INTO residents (first_name, last_name, email, phone_number, resident_photo_url, resident_ine_photo_url, id_house)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING id_resident, email, full_name`,
-      [fullName, email, phoneNumber, residentPhotoUrl, ineUrl, idHouse, idResidential]
+       RETURNING id_resident, email, first_name, last_name`,
+      [firstName, lastName, email, phoneNumber, residentPhotoUrl, ineUrl, idHouse]
     );
     const newResident = residentResponse.rows[0];
 
-    // 6. Marcar el código de invitación como utilizado.
+    // 7. Marcar el código de invitación como utilizado (Sin cambios)
     await pool.query("UPDATE invitation_codes SET is_used = true WHERE id_code = $1", [idCode]);
 
-    // 7. Responder con éxito y los datos del nuevo residente.
+    // 8. Responder con éxito (Sin cambios)
     res.status(201).json({
       success: true,
       message: "Residente registrado exitosamente",
-      resident: { ...newResident, resident_photo_url: residentPhotoUrl, resident_ine_url: ineUrl },
+      resident: { 
+        ...newResident, 
+        resident_photo_url: residentPhotoUrl, 
+        resident_ine_photo_url: ineUrl // Nombre de clave corregido
+      },
     });
 
   } catch (error) {
-    // Manejo de error específico para email duplicado.
+    // Manejo de error para email duplicado (Sin cambios)
     if (error.code === '23505') {
       return res.status(409).json({ error: "El correo electrónico ya está registrado" });
     }
     
-    // Manejo de otros errores del servidor.
+    console.error("Error en registerResident:", error);
     res.status(500).json({
       error: "Error en el servidor al registrar al residente",
       details: error.message,
