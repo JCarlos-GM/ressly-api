@@ -7,6 +7,7 @@
  */
 
 import express from "express";
+import cors from "cors"; // ← AGREGAR ESTA LÍNEA
 import usersRoutes from "./routes/users.routes.js";
 import registerRoutes from "./routes/register.routes.js";
 import morgan from "morgan";
@@ -16,6 +17,13 @@ import { pool } from "./db.js";
 const app = express();
 
 // --- Middlewares ---
+// *** AGREGAR CORS AQUÍ - ANTES DE MORGAN ***
+app.use(cors({
+  origin: '*', // Permite todas las origenes
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 // Morgan se usa para registrar las peticiones HTTP en la consola (útil en desarrollo).
 app.use(morgan("dev"));
 // Middlewares de Express para interpretar JSON y datos de formularios.
