@@ -2,7 +2,7 @@
  * Este archivo define las rutas para el proceso de registro, incluyendo la validación
  * de códigos y el registro de nuevos residentes con carga de archivos.
  * Autor: Juan Carlos Govea Magaña
- * Fecha: 20/10/2025
+ * Fecha: 20/10/2025.
  */
 
 import { Router } from "express";
