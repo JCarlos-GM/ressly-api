@@ -1,6 +1,7 @@
 /**
  * Definición de rutas para el módulo de reportes
  * Fecha: 01/11/2025
+ * Actualizado: Endpoints para reportes comunitarios y votación
  */
 
 import { Router } from "express";
@@ -8,7 +9,10 @@ import multer from "multer";
 import { 
   createReport, 
   getReportsByResident, 
-  deleteReport 
+  deleteReport,
+  getCommunityReports,
+  voteReport,
+  removeVote
 } from "../controllers/reports.controller.js";
 
 const router = Router();
@@ -23,7 +27,7 @@ const upload = multer({ storage });
  */
 router.post(
   "/create",
-  upload.array("images", 5), // ✅ CAMBIAR A "images" (sin fields)
+  upload.array("images", 5), 
   createReport
 );
 
@@ -32,6 +36,26 @@ router.post(
  * Obtiene todos los reportes de un residente específico
  */
 router.get("/resident/:idResident", getReportsByResident);
+
+/**
+ * GET /api/reports/community/:idResidential
+ * Obtiene todos los reportes públicos de un residencial
+ * Query params: ?filter=todas|semana|mes&idResident=xxx
+ */
+router.get("/community/:idResidential", getCommunityReports);
+
+/**
+ * POST /api/reports/vote
+ * Vota por un reporte (upvote o downvote)
+ * Body: { idReport, idResident, voteValue: 1 o -1 }
+ */
+router.post("/vote", voteReport);
+
+/**
+ * DELETE /api/reports/vote/:idReport/:idResident
+ * Elimina el voto de un residente en un reporte
+ */
+router.delete("/vote/:idReport/:idResident", removeVote);
 
 /**
  * DELETE /api/reports/delete/:idReport
