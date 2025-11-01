@@ -1,10 +1,9 @@
 import { Router } from "express";
 import multer from "multer";
-import { registerPet } from "../controllers/pets.controller.js";
+import { registerPet, getPetsByResident } from "../controllers/pets.controller.js";
 
 const router = Router();
 
-// Configurar multer para manejar archivos en memoria
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
@@ -14,5 +13,8 @@ router.post(
   upload.fields([{ name: "petImage", maxCount: 1 }]),
   registerPet
 );
+
+// Ruta para obtener mascotas de un residente
+router.get("/resident/:idResident", getPetsByResident);
 
 export default router;

@@ -85,3 +85,53 @@ export const registerPet = async (req, res) => {
     });
   }
 };
+
+/**
+ * Obtiene todas las mascotas de un residente específico
+ */
+export const getPetsByResident = async (req, res) => {
+  try {
+    const { idResident } = req.params;
+
+    if (!idResident) {
+      return res.status(400).json({ 
+        error: "El ID del residente es requerido" 
+      });
+    }
+
+    // Verificar que el residente existe
+    const residentCheck = await pool.query(
+      "SELECT id_resident FROM residents WHERE id_resident = $1",
+      [idResident]
+    );
+    
+    if (residentCheck.rows.length === 0) {
+      return res.status(404).json({ 
+        error: "Residente no encontrado" 
+      });
+    }
+
+    // Obtener todas las mascotas del residente
+    const petsResponse = await pool.query(
+      `SELECT id_pet, name, specie, breed, color, description, 
+              status, pet_photo_url, created_at, id_resident
+       FROM pets 
+       WHERE id_resident = $1
+       ORDER BY created_at DESC`,
+      [idResident]
+    );
+
+    res.status(200).json({
+      success: true,
+      count: petsResponse.rows.length,
+      pets: petsResponse.rows
+    });
+
+  } catch (error) {
+    console.error("Error en getPetsByResident:", error);
+    res.status(500).json({
+      error: "Error en el servidor al obtener las mascotas",
+      details: error.message,
+    });
+  }
+};
