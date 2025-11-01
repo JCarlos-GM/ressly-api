@@ -23,7 +23,7 @@ const upload = multer({ storage });
  */
 router.post(
   "/create",
-  upload.fields([{ name: "reportImages", maxCount: 5 }]),
+  upload.array("images", 5), // ✅ CAMBIAR A "images" (sin fields)
   createReport
 );
 

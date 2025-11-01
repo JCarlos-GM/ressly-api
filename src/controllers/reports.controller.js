@@ -1,6 +1,6 @@
 /**
  * Controlador para manejar la lógica del CRUD de reportes.
- * Autor: [Tu nombre]
+ * Autor: Juan Carlos Govea Magaña
  * Fecha: 01/11/2025
  */
 
@@ -40,14 +40,14 @@ export const createReport = async (req, res) => {
     await client.query("BEGIN");
 
     const { 
+      idResident,
       title, 
       category, 
       urgency, 
       location, 
       description, 
       anonymous, 
-      public: isPublic, 
-      idResident 
+      publicReport
     } = req.body;
 
     // 1. Validar campos obligatorios
@@ -59,7 +59,8 @@ export const createReport = async (req, res) => {
     }
 
     // 2. Validar que se recibió al menos una imagen
-    if (!req.files || !req.files.reportImages || req.files.reportImages.length === 0) {
+    // ✅ CAMBIO: Ahora viene como req.files (array directo)
+    if (!req.files || req.files.length === 0) {
       await client.query("ROLLBACK");
       return res.status(400).json({
         error: "Debes subir al menos una imagen para el reporte"
@@ -67,7 +68,7 @@ export const createReport = async (req, res) => {
     }
 
     // 3. Validar máximo de imágenes
-    if (req.files.reportImages.length > 5) {
+    if (req.files.length > 5) {
       await client.query("ROLLBACK");
       return res.status(400).json({
         error: "El máximo de imágenes permitidas es 5"
@@ -115,7 +116,7 @@ export const createReport = async (req, res) => {
 
     // 7. Convertir valores booleanos (vienen como strings desde FormData)
     const isAnonymous = anonymous === "true" || anonymous === true;
-    const isPublicReport = isPublic === "true" || isPublic === true;
+    const isPublicReport = publicReport === "true" || publicReport === true;
 
     // 8. Insertar el reporte en la base de datos
     const reportResponse = await client.query(
@@ -140,11 +141,9 @@ export const createReport = async (req, res) => {
 
     // 9. Subir todas las imágenes a Cloudinary y guardar en reports_images
     const imageUrls = [];
-    const images = Array.isArray(req.files.reportImages) 
-      ? req.files.reportImages 
-      : [req.files.reportImages];
 
-    for (const image of images) {
+    // ✅ CAMBIO: Ahora req.files ya es un array directo
+    for (const image of req.files) {
       try {
         // Subir imagen a Cloudinary
         const imageUrl = await uploadReportImage(image.buffer);
@@ -157,7 +156,7 @@ export const createReport = async (req, res) => {
           [imageUrl, newReport.id_report]
         );
 
-        imageUrls.push(imageResponse.rows[0]);
+        imageUrls.push(imageResponse.rows[0].report_image_photo_url);
       } catch (uploadError) {
         console.error("Error al subir imagen:", uploadError);
         await client.query("ROLLBACK");
@@ -234,7 +233,7 @@ export const getReportsByResident = async (req, res) => {
     const reportsWithImages = await Promise.all(
       reports.map(async (report) => {
         const imagesResponse = await pool.query(
-          `SELECT id_report_image, report_image_photo_url
+          `SELECT report_image_photo_url
            FROM reports_images
            WHERE id_report = $1
            ORDER BY id_report_image ASC`,
@@ -243,7 +242,7 @@ export const getReportsByResident = async (req, res) => {
 
         return {
           ...report,
-          images: imagesResponse.rows
+          images: imagesResponse.rows.map(img => img.report_image_photo_url)
         };
       })
     );
