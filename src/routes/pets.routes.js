@@ -1,6 +1,6 @@
 import { Router } from "express";
 import multer from "multer";
-import { registerPet, getPetsByResident } from "../controllers/pets.controller.js";
+import { registerPet, getPetsByResident, updatePet } from "../controllers/pets.controller.js";
 
 const router = Router();
 
@@ -16,5 +16,8 @@ router.post(
 
 // Ruta para obtener mascotas de un residente
 router.get("/resident/:idResident", getPetsByResident);
+
+// Ruta para actualizar una mascota
+router.put("/update/:idPet", updatePet);
 
 export default router;

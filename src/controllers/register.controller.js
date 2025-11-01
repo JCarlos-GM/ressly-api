@@ -164,3 +164,66 @@ export const registerResident = async (req, res) => {
     });
   }
 };
+
+/**
+ * Actualiza los datos de una mascota
+ */
+export const updatePet = async (req, res) => {
+  try {
+    const { idPet } = req.params;
+    const { name, specie, breed, color, description, status } = req.body;
+
+    // Validar campos obligatorios
+    if (!name || !specie || !breed || !color) {
+      return res.status(400).json({ 
+        error: "Los campos nombre, especie, raza y color son obligatorios" 
+      });
+    }
+
+    // Validar que el status sea válido
+    const validStatuses = ['En Casa', 'Desaparecida', 'Fallecida'];
+    if (status && !validStatuses.includes(status)) {
+      return res.status(400).json({ 
+        error: "Estado no válido. Debe ser: En Casa, Desaparecida o Fallecida" 
+      });
+    }
+
+    // Verificar que la mascota existe
+    const petCheck = await pool.query(
+      "SELECT id_pet FROM pets WHERE id_pet = $1",
+      [idPet]
+    );
+    
+    if (petCheck.rows.length === 0) {
+      return res.status(404).json({ 
+        error: "Mascota no encontrada" 
+      });
+    }
+
+    // Actualizar la mascota
+    const updateResponse = await pool.query(
+      `UPDATE pets 
+       SET name = $1, specie = $2, breed = $3, color = $4, 
+           description = $5, status = $6
+       WHERE id_pet = $7
+       RETURNING id_pet, name, specie, breed, color, description, 
+                 status, pet_photo_url, created_at, id_resident`,
+      [name, specie, breed, color, description || null, status || 'En Casa', idPet]
+    );
+
+    const updatedPet = updateResponse.rows[0];
+
+    res.status(200).json({
+      success: true,
+      message: "Mascota actualizada exitosamente",
+      pet: updatedPet
+    });
+
+  } catch (error) {
+    console.error("Error en updatePet:", error);
+    res.status(500).json({
+      error: "Error en el servidor al actualizar la mascota",
+      details: error.message,
+    });
+  }
+};
