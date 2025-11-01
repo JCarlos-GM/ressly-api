@@ -198,3 +198,50 @@ export const updatePet = async (req, res) => {
     });
   }
 };
+
+/**
+ * Elimina una mascota
+ */
+export const deletePet = async (req, res) => {
+  try {
+    const { idPet } = req.params;
+
+    if (!idPet) {
+      return res.status(400).json({ 
+        error: "El ID de la mascota es requerido" 
+      });
+    }
+
+    // Verificar que la mascota existe
+    const petCheck = await pool.query(
+      "SELECT id_pet, name FROM pets WHERE id_pet = $1",
+      [idPet]
+    );
+    
+    if (petCheck.rows.length === 0) {
+      return res.status(404).json({ 
+        error: "Mascota no encontrada" 
+      });
+    }
+
+    const petName = petCheck.rows[0].name;
+
+    // Eliminar la mascota
+    await pool.query(
+      "DELETE FROM pets WHERE id_pet = $1",
+      [idPet]
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `${petName} ha sido eliminada exitosamente`
+    });
+
+  } catch (error) {
+    console.error("Error en deletePet:", error);
+    res.status(500).json({
+      error: "Error en el servidor al eliminar la mascota",
+      details: error.message,
+    });
+  }
+};
