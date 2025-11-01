@@ -7,12 +7,14 @@
  */
 
 import express from "express";
-import cors from "cors"; // ← AGREGAR ESTA LÍNEA
+import cors from "cors"; 
 import usersRoutes from "./routes/users.routes.js";
 import registerRoutes from "./routes/register.routes.js";
+import petsRoutes from "./routes/pets.routes.js";
 import morgan from "morgan";
 import { PORT } from "./config.js";
 import { pool } from "./db.js";
+import residentsRoutes from "./routes/residents.routes.js";
 
 const app = express();
 
@@ -29,6 +31,9 @@ app.use(morgan("dev"));
 // Middlewares de Express para interpretar JSON y datos de formularios.
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+app.use("/api/residents", residentsRoutes);
+app.use("/api/pets", petsRoutes);
 
 // --- Ruta Raíz (Health Check) ---
 // Sirve como una comprobación rápida para ver si la API está en línea y funcionando.
