@@ -13,13 +13,26 @@ export const getResidentByEmail = async (req, res) => {
       });
     }
 
-    const response = await pool.query(
-      `SELECT id_resident, first_name, last_name, email, phone_number, 
-              resident_photo_url, resident_ine_photo_url, status, id_house
-       FROM residents 
-       WHERE email = $1`,
-      [email]
-    );
+    // --- INICIO DE LA CORRECCIÓN ---
+    const query = `
+      SELECT 
+        res.id_resident, 
+        res.first_name, 
+        res.last_name, 
+        res.email, 
+        res.phone_number, 
+        res.resident_photo_url, 
+        res.resident_ine_photo_url, 
+        res.status, 
+        res.id_house,
+        h.id_residential  -- <-- ¡CAMPO AÑADIDO!
+      FROM residents AS res
+      INNER JOIN houses AS h ON res.id_house = h.id_house
+      WHERE res.email = $1
+    `;
+    // --- FIN DE LA CORRECCIÓN ---
+
+    const response = await pool.query(query, [email]); // Se usa la nueva query
 
     if (response.rows.length === 0) {
       return res.status(404).json({ 
@@ -27,11 +40,11 @@ export const getResidentByEmail = async (req, res) => {
       });
     }
 
-    const resident = response.rows[0];
+    const resident = response.rows[0]; // 'resident' ahora contendrá 'id_residential'
 
     res.status(200).json({
       success: true,
-      resident: resident
+      resident: resident // La app recibirá el objeto completo
     });
 
   } catch (error) {
