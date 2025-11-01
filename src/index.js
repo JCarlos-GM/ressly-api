@@ -10,6 +10,7 @@ import express from "express";
 import cors from "cors"; 
 import usersRoutes from "./routes/users.routes.js";
 import registerRoutes from "./routes/register.routes.js";
+import reportsRoutes from "./routes/reports.routes.js"; 
 import petsRoutes from "./routes/pets.routes.js";
 import morgan from "morgan";
 import { PORT } from "./config.js";
@@ -34,6 +35,7 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use("/api/residents", residentsRoutes);
 app.use("/api/pets", petsRoutes);
+app.use("/api/reports", reportsRoutes);
 
 // --- Ruta Raíz (Health Check) ---
 // Sirve como una comprobación rápida para ver si la API está en línea y funcionando.
